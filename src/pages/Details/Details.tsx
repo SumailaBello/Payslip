@@ -26,9 +26,13 @@ const Details: React.FC = (props) => {
     })
 
     useIonViewDidEnter(()=> {
-        if(!paySlip) router.goBack();
+        routeBack();
     })
     
+    const routeBack = ()=> {
+        if(!paySlip) router.goBack();
+    }
+
     // download file to device
     const download = async (redownload?: boolean) => {
         if(redownload) {
@@ -133,52 +137,52 @@ const Details: React.FC = (props) => {
                 </IonToolbar>
             </IonHeader>
             <IonContent className="ion-padding" color={'light'}>
-                <div style={{height: '100%', display: 'flex', alignItems: 'center'}}>
+                <div style={{height: '100%', display: 'flex', alignItems: 'center'}} data-testid="cypress-details">
                     <IonCard style={{width: '100%'}}>
                         <IonCardContent>
-                            <IonItem lines='full'>
+                            <IonItem lines='full' data-testid="cypress-ref-item">
                                 <IonIcon size="small" icon={ribbonOutline} slot='start' color='medium' />
-                                <IonLabel>
+                                <IonLabel data-testid="cypress-ref-label">
                                     <IonText color={'primary'}><small>Reference</small></IonText>  
                                     <br />
                                     {paySlip?.id}
                                 </IonLabel>
                             </IonItem>
-                            <IonItem lines='full'>
+                            <IonItem lines='full' data-testid="cypress-name-item">
                                 <IonIcon size="small" icon={personOutline} slot='start' color='medium' />
-                                <IonLabel>
+                                <IonLabel data-testid="cypress-name-label">
                                     <IonText color={'primary'}><small>Name</small></IonText>
                                     <br />
                                     {paySlip?.name}
                                 </IonLabel>
                             </IonItem>
-                            <IonItem lines='full'>
+                            <IonItem lines='full' data-testid="cypress-amount-item">
                                 <IonIcon size="small" icon={cashOutline} slot='start' color='medium' />
-                                <IonLabel>
+                                <IonLabel data-testid="cypress-amount-label">
                                     <IonText color={'primary'}><small>Amount</small></IonText>
                                     <br />
                                     ${paySlip?.amount}
                                 </IonLabel>
                             </IonItem>
-                            <IonItem lines='full'>
+                            <IonItem lines='full' data-testid="cypress-deductions-item">
                                 <IonIcon size="small" icon={cashOutline} slot='start' color='medium' />
-                                <IonLabel>
+                                <IonLabel data-testid="cypress-amount-label">
                                     <IonText color={'primary'}><small>Deductions</small></IonText> 
                                     <br />
                                     ${paySlip?.deductions}
                                 </IonLabel>
                             </IonItem>
-                            <IonItem lines='full'>
+                            <IonItem lines='full' data-testid="cypress-from-item">
                                 <IonIcon size="small" icon={calendarOutline} slot='start' color='medium' />
-                                <IonLabel>
+                                <IonLabel data-testid="cypress-amount-label">
                                     <IonText color={'primary'}><small>From</small></IonText> 
                                     <br />
                                     {paySlip?.fromDate.toLocaleDateString()}
                                 </IonLabel>
                             </IonItem>
-                            <IonItem lines='full'>
+                            <IonItem lines='full' data-testid="cypress-to-item">
                                 <IonIcon size="small" icon={calendarOutline} slot='start' color='medium' />
-                                <IonLabel>
+                                <IonLabel data-testid="cypress-amount-label">
                                     <IonText color={'primary'}><small>To</small></IonText> 
                                     <br />
                                     {paySlip?.toDate.toLocaleDateString()}
@@ -188,7 +192,7 @@ const Details: React.FC = (props) => {
                     </IonCard>
                 </div>
             </IonContent>
-            <IonFooter slot='bottom' className='ion-no-border'>
+            <IonFooter slot='bottom' className='ion-no-border' data-testid="cypress-footer">
                 <IonToolbar className='ion-padding' color={'light'}>
                 {isDownloading ? (
                     <IonButton color={'danger'} expand='block' onClick={cancelDownload}>
@@ -198,15 +202,13 @@ const Details: React.FC = (props) => {
                         </IonText>
                     </IonButton>
                 ) : (
-                    <IonButton expand='block' 
+                    <IonButton expand='block' data-testid="cypress-download-btn"
                         onClick={()=> download(downloadedFile ? true : false)} 
                         disabled={isDownloading} className='ion-margin-top'>
                             <IonIcon icon={downloadOutline} color='light' />
                             <IonText color={'light'} className='ion-margin-start'>
                                 Download
                             </IonText>
-                        {/* </>  
-                        )} */}
                     </IonButton>  
                 )}
                 </IonToolbar>
