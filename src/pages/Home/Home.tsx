@@ -9,20 +9,21 @@ const Home: React.FC = () => {
 
   //LOCAL STATE
   const [list, setList] = useState<Array<PaySlip>>([...paySlips]);
+  // const list = useMemo(() => paySlips, []);
 
   return (
     <IonPage>
-      <IonHeader>
+      <IonHeader translucent>
         <IonToolbar color={'light'}>
           <IonTitle>Payslips</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent fullscreen color={'light'}>
-        <IonHeader collapse="condense">
+      <IonContent fullscreen color={'light'} style={{paddingBottom: '100px'}}>
+        {/* <IonHeader collapse="condense">
           <IonToolbar color={'light'}>
             <IonTitle size="large">Payslips</IonTitle>
           </IonToolbar>
-        </IonHeader>
+        </IonHeader> */}
         <VirtualList items={list} />
       </IonContent>
     </IonPage>

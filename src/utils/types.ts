@@ -9,14 +9,14 @@ export interface PaySlip {
     fromDate: Date,
     toDate: Date,
     payDate: Date,
-    fileSrc: string,
+    file: string,
 }
 
 export interface RowType {
     item: any, // so any object can be passed in
     index?: number,
     style?: CSSProperties,
-    onClick?: ()=> void,
+    onClick?: (item?: any)=> void,
 }
 
 export interface VirtualListType {

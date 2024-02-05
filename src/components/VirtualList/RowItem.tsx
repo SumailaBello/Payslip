@@ -1,20 +1,13 @@
 import { FC } from 'react';
-import { PaySlip, RowType } from '../../utils/types';
-import { IonItem, IonLabel, IonIcon, IonCard, IonCardContent, useIonRouter, IonNote } from '@ionic/react';
+import { RowType } from '../../utils/types';
+import { IonItem, IonLabel, IonIcon, IonCard, IonCardContent, IonNote } from '@ionic/react';
 import {readerOutline} from 'ionicons/icons';
-import { useHistory } from 'react-router-dom';
 
 const RowItem: FC<RowType> = ({ item, index, style, onClick }) => {
-    // const router = useIonRouter();
-    const history = useHistory();
-
-    const handleClick = (item: PaySlip )=> {
-        history.push({pathname: 'Details', state: item})
-    }
 
     return (
-        <div style={{ height: '56px' , ...style}}>
-            <IonCard onClick={()=> handleClick(item)} >
+        <div style={{height: '109px', ...style}}>
+            <IonCard onClick={()=> onClick && onClick(item)}>
                 <IonCardContent>
                     <IonItem lines='none' detail>
                         <IonIcon slot='start' size='large' icon={readerOutline} color='medium'></IonIcon>

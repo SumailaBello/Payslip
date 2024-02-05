@@ -1,76 +1,103 @@
 import { IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonCol, IonContent, IonFooter, IonHeader, IonIcon, IonItem, IonLabel, IonLoading, IonPage, IonProgressBar, IonRow, IonSpinner, IonText, IonTitle, IonToolbar, useIonAlert, useIonLoading, useIonRouter, useIonViewDidEnter, useIonViewWillLeave } from '@ionic/react';
 import { useLocation } from 'react-router-dom';
 import { PaySlip } from '../../utils/types';
-import {downloadOutline, closeCircleOutline} from 'ionicons/icons';
+import {downloadOutline, closeCircleOutline, openOutline, ribbonOutline, personOutline, cashOutline, calendarOutline} from 'ionicons/icons';
 import { FileDownload, FileDownloadProgress, FileDownloadResponse } from "capacitor-plugin-filedownload";
 import { useState } from 'react';
 // import '@capacitor-comunity/';
 // import { CapacitorHttp } from '@capacitor/core';
 import { FileOpener } from '@capacitor-community/file-opener';
-import { CreateAnimation, Animation } from '@ionic/react';
 
 const Details: React.FC = (props) => {
     //ROUTER HOOKS
     const location = useLocation();
+    const router = useIonRouter();
     const paySlip: PaySlip = location.state as PaySlip;
 
     //IONIC HOOKS
     const [presentAlert, dismissAlert] = useIonAlert();
-    const [presentLoader, dismissLoader] = useIonLoading();
 
     //LOCAL STATE
     const [downloadProgress, setDownloadProgress] = useState<number>(0);
     const [isDownloading, setIsDownloading] = useState<boolean>(false);
     const [downloadedFile, setDownloadedFile] = useState<FileDownloadResponse | null>(null);
 
-    // lifecycle hook
+    // LIFECYCLE HOOKS
     useIonViewWillLeave(()=> {
         FileDownload.cancel();
     })
-    
 
-    const download = async () => {
-        setIsDownloading(true);
-        try {
-            await FileDownload.addListener('downloadProgress', handleDownloadProgress);
-            const res = await FileDownload.download({
-                url: paySlip.fileSrc,
-                fileName: paySlip.name.split(" ").join("") + new Date().toLocaleDateString().split("/").join("") + '.pdf',
-                // headers for http request with POST method
-                headers: {},
-                // parameter for http request with POST method
-                body: {},
-                // only works on Android, deprecated since 1.0.6
-                downloadTitle: 'Downloading Payslip',
-                // only works on Android, deprecated since 1.0.6
-                downloadDescription: 'file is downloading',
-            })
-            setIsDownloading(false);
-            setDownloadedFile(res);
-            console.log(res);
-            presentAlert('Download Completed', [
-                {
-                    text: 'Close',
-                    role: 'destructive'
-                },
-                {
-                    text: 'Open File',
-                    handler: ()=> {
-                        openFile(res);
-                    },
-                },
-            ])
-        } 
-        catch (err) {
-            console.log(err);
-            setIsDownloading(false);
-            presentAlert('An error occured while downloading file')
+    useIonViewDidEnter(()=> {
+        if(!paySlip) router.goBack();
+    })
+    
+    // download file to device
+    const download = async (redownload?: boolean) => {
+        if(redownload) {
+            confirmRedownload();
         }
+        else {
+            setIsDownloading(true);
+            try {
+                await FileDownload.addListener('downloadProgress', handleDownloadProgress);
+                const res = await FileDownload.download({
+                    url: paySlip.file,
+                    fileName: paySlip.name.split(" ").join("_") + new Date().toLocaleDateString().split("/").join("") + '.pdf',
+                    // headers for http request with POST method
+                    headers: {},
+                    // parameter for http request with POST method
+                    body: {},
+                })
+                setIsDownloading(false);
+                setDownloadedFile(res);
+                console.log(res);
+                //on ios, the promise resolves with an undefined res value when download is cancelled by user
+                //we handle the bug with the below code
+                if(!res) {
+                    presentAlert('Download cancelled');
+                    return
+                }
+                presentAlert('Download Completed', [
+                    {
+                        text: 'Close',
+                        role: 'destructive'
+                    },
+                    {
+                        text: 'Open file',
+                        handler: ()=> {
+                            openFile(res);
+                        },
+                    },
+                ])
+            } 
+            catch (err) {
+                console.log(err);
+                setIsDownloading(false);
+                if(err == 'Error: download fail: stream was reset: CANCEL') return
+                presentAlert('An error occured while downloading file')
+            }
+        }
+    }
+
+    //confirm redownload
+    const confirmRedownload = async ()=> {
+        await presentAlert('Do you want to redownload file?', [
+            {
+                text: 'No',
+                role: 'destructive'
+            },
+            {
+                text: 'Download',
+                handler: ()=> {
+                    download();
+                },
+            },
+        ])
     }
 
     // dispplays download progress
     const handleDownloadProgress = (progress: FileDownloadProgress) => {
-        console.log(progress);
+        // console.log(progress);
         setDownloadProgress(progress.progress);
     }
 
@@ -90,96 +117,69 @@ const Details: React.FC = (props) => {
     return (
         <IonPage>
             <IonHeader>
-                <IonToolbar >
-                    {/* <IonButton slot='start'>
-                        <IonIcon icon={} />
-                    </IonButton> */}
+                <IonToolbar>
                     <IonButtons slot='start'>
                         <IonBackButton />
                     </IonButtons>
                     <IonTitle>Payslip Details</IonTitle>
+                    {downloadedFile && (
+                        <IonButton size='small' fill='clear' slot='end' onClick={()=> openFile(downloadedFile as FileDownloadResponse)}>
+                            <IonIcon icon={openOutline} />
+                        </IonButton>
+                    )}
+                    {isDownloading && (
+                        <IonProgressBar type='determinate' value={downloadProgress / 100}></IonProgressBar>
+                    )}
                 </IonToolbar>
-                {
-                    isDownloading || downloadedFile && (
-                        <CreateAnimation
-                            duration={1000}
-                            fromTo={{
-                                property: 'opacity',
-                                fromValue: '0.3',
-                                toValue: '1'
-                            }}
-                        >
-                            <IonToolbar>
-                                <IonRow  className='ion-align-items-center'>
-                                    <IonCol size='10' className='ion-align-items-center'>
-                                        <IonProgressBar type='determinate' value={downloadProgress / 100}></IonProgressBar>
-                                    </IonCol>
-                                    {
-                                        isDownloading && (
-                                            <IonCol size='2'>
-                                                <IonButton color={'transparent'} size='small' onClick={cancelDownload}>
-                                                    <IonIcon color='danger' size='large' icon={closeCircleOutline}></IonIcon>
-                                                </IonButton>
-                                            </IonCol>
-                                        )
-                                    }
-                                    {
-                                        isDownloading && (
-                                            <IonCol size='2'>
-                                                <IonButton color={'transparent'} size='small'>
-                                                    <IonIcon color='danger' size='large' icon={closeCircleOutline}></IonIcon>
-                                                </IonButton>
-                                            </IonCol>
-                                        )
-                                    }
-                                </IonRow>
-                            </IonToolbar>
-                        </CreateAnimation>
-                    )
-                }
             </IonHeader>
             <IonContent className="ion-padding" color={'light'}>
                 <div style={{height: '100%', display: 'flex', alignItems: 'center'}}>
                     <IonCard style={{width: '100%'}}>
                         <IonCardContent>
-                            <IonItem>
+                            <IonItem lines='full'>
+                                <IonIcon size="small" icon={ribbonOutline} slot='start' color='medium' />
                                 <IonLabel>
-                                    <IonText color={'medium'}>Reference</IonText>  
+                                    <IonText color={'primary'}><small>Reference</small></IonText>  
                                     <br />
                                     {paySlip?.id}
                                 </IonLabel>
                             </IonItem>
-                            <IonItem>
+                            <IonItem lines='full'>
+                                <IonIcon size="small" icon={personOutline} slot='start' color='medium' />
                                 <IonLabel>
-                                    <IonText color={'medium'}>Name</IonText>
+                                    <IonText color={'primary'}><small>Name</small></IonText>
                                     <br />
                                     {paySlip?.name}
                                 </IonLabel>
                             </IonItem>
-                            <IonItem>
+                            <IonItem lines='full'>
+                                <IonIcon size="small" icon={cashOutline} slot='start' color='medium' />
                                 <IonLabel>
-                                    <IonText color={'medium'}>Amount</IonText>
+                                    <IonText color={'primary'}><small>Amount</small></IonText>
                                     <br />
                                     ${paySlip?.amount}
                                 </IonLabel>
                             </IonItem>
-                            <IonItem>
+                            <IonItem lines='full'>
+                                <IonIcon size="small" icon={cashOutline} slot='start' color='medium' />
                                 <IonLabel>
-                                    <IonText color={'medium'}>Deductions</IonText> 
+                                    <IonText color={'primary'}><small>Deductions</small></IonText> 
                                     <br />
                                     ${paySlip?.deductions}
                                 </IonLabel>
                             </IonItem>
-                            <IonItem>
+                            <IonItem lines='full'>
+                                <IonIcon size="small" icon={calendarOutline} slot='start' color='medium' />
                                 <IonLabel>
-                                    <IonText color={'medium'}>From</IonText> 
+                                    <IonText color={'primary'}><small>From</small></IonText> 
                                     <br />
                                     {paySlip?.fromDate.toLocaleDateString()}
                                 </IonLabel>
                             </IonItem>
-                            <IonItem>
+                            <IonItem lines='full'>
+                                <IonIcon size="small" icon={calendarOutline} slot='start' color='medium' />
                                 <IonLabel>
-                                    <IonText color={'medium'}>To</IonText> 
+                                    <IonText color={'primary'}><small>To</small></IonText> 
                                     <br />
                                     {paySlip?.toDate.toLocaleDateString()}
                                 </IonLabel>
@@ -190,18 +190,25 @@ const Details: React.FC = (props) => {
             </IonContent>
             <IonFooter slot='bottom' className='ion-no-border'>
                 <IonToolbar className='ion-padding' color={'light'}>
-                    <IonButton expand='block' onClick={download} disabled={isDownloading}>
-                        {isDownloading ? (
-                            <IonSpinner color={'light'} name='lines-small' />
-                        ) : (
-                          <>
+                {isDownloading ? (
+                    <IonButton color={'danger'} expand='block' onClick={cancelDownload}>
+                        <IonIcon size='small' icon={closeCircleOutline}></IonIcon>
+                        <IonText className='ion-margin-start'>
+                            Cancel Download
+                        </IonText>
+                    </IonButton>
+                ) : (
+                    <IonButton expand='block' 
+                        onClick={()=> download(downloadedFile ? true : false)} 
+                        disabled={isDownloading} className='ion-margin-top'>
                             <IonIcon icon={downloadOutline} color='light' />
                             <IonText color={'light'} className='ion-margin-start'>
                                 Download
                             </IonText>
-                          </>  
-                        )}
-                    </IonButton>
+                        {/* </>  
+                        )} */}
+                    </IonButton>  
+                )}
                 </IonToolbar>
             </IonFooter>
         </IonPage>
