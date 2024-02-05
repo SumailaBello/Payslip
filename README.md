@@ -2,7 +2,7 @@
 
 ## Overview
 
-Welcome to **ionic-tracker**! This mobile application is built with ionic and capacitor, a framework for building native apps with web technologies.
+Welcome to **payslip mobile**! This mobile application is built with ionic and capacitor, a framework for building native apps with web technologies.
 
 ## Table of Contents
 
