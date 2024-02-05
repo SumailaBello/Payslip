@@ -13,7 +13,7 @@ const Home: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader translucent>
+      <IonHeader translucent data-testid="cypress-home-header">
         <IonToolbar color={'light'}>
           <IonTitle>Payslips</IonTitle>
         </IonToolbar>

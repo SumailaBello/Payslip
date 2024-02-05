@@ -4,8 +4,6 @@ import { PaySlip } from '../../utils/types';
 import {downloadOutline, closeCircleOutline, openOutline, ribbonOutline, personOutline, cashOutline, calendarOutline} from 'ionicons/icons';
 import { FileDownload, FileDownloadProgress, FileDownloadResponse } from "capacitor-plugin-filedownload";
 import { useState } from 'react';
-// import '@capacitor-comunity/';
-// import { CapacitorHttp } from '@capacitor/core';
 import { FileOpener } from '@capacitor-community/file-opener';
 
 const Details: React.FC = (props) => {
@@ -51,7 +49,7 @@ const Details: React.FC = (props) => {
                 setIsDownloading(false);
                 setDownloadedFile(res);
                 console.log(res);
-                //on ios, the promise resolves with an undefined res value when download is cancelled by user
+                //on ios, the promise resolves with an undefined value for res when download is cancelled by user
                 //we handle the bug with the below code
                 if(!res) {
                     presentAlert('Download cancelled');
@@ -73,6 +71,8 @@ const Details: React.FC = (props) => {
             catch (err) {
                 console.log(err);
                 setIsDownloading(false);
+                //cancelling on android throws an error that returns the below error string so we check for that to prevent displaying the
+                //wrong error message to user in the alert popup
                 if(err == 'Error: download fail: stream was reset: CANCEL') return
                 presentAlert('An error occured while downloading file')
             }
@@ -95,7 +95,7 @@ const Details: React.FC = (props) => {
         ])
     }
 
-    // dispplays download progress
+    // dispplays/handles download progress
     const handleDownloadProgress = (progress: FileDownloadProgress) => {
         // console.log(progress);
         setDownloadProgress(progress.progress);

@@ -18,6 +18,7 @@ export const VirtualList: FC<VirtualListType> = ({ items })=> {
 
     return ( 
         <Virtuoso className="ion-content-scroll-host"
+            data-testid="cypress-virtual-list"
             style={{ height: '100%', }}
             // totalCount={items?.length}
             data={list}
@@ -34,7 +35,7 @@ export const VirtualList: FC<VirtualListType> = ({ items })=> {
             itemContent={(index, item) => {
                 // console.log(item)
                 return (
-                    <RowItem item={item} onClick={handleClick} />
+                    <RowItem item={item} onClick={handleClick} index={index} />
                 );
             }}
             increaseViewportBy={{

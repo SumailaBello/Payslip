@@ -4,10 +4,11 @@ import { IonItem, IonLabel, IonIcon, IonCard, IonCardContent, IonNote } from '@i
 import {readerOutline} from 'ionicons/icons';
 
 const RowItem: FC<RowType> = ({ item, index, style, onClick }) => {
+    console.log(index)
 
     return (
-        <div style={{height: '109px', ...style}}>
-            <IonCard onClick={()=> onClick && onClick(item)}>
+        <div style={{height: '109px', ...style}} data-testid={`${index}`}>
+            <IonCard onClick={()=> onClick && onClick(item)} data-testid="cypress-row-item">
                 <IonCardContent>
                     <IonItem lines='none' detail>
                         <IonIcon slot='start' size='large' icon={readerOutline} color='medium'></IonIcon>
